@@ -1,0 +1,38 @@
+﻿@model IEnumerable < TestForum.Models.TopicModel>
+
+@{
+    ViewBag.Title = "Topic List";
+}
+
+<h2>List of Topics</h2>
+<p>
+    @Html.ActionLink("Create New", "Create", null, new { @class="btn btn-primary"})
+</p>
+
+@if (Model.Any())
+{
+    foreach (var item in Model)
+    {
+       <div class="card w-100">
+           <div class="card-body">
+               <h5 class="card-title">@item.Title</h5>
+               <p class="card-subtitle">Author: @item.AuthorName</p>
+               <p class="text-md-right text-muted">Created at: @item.CreatedDate</p>
+           </div>
+           @Html.ActionLink("Read Posts", "Details", new { id=item.Id }, new { @class="btn btn-primary btn-sm"})
+           @if (User.Identity.Name == item.AuthorName)
+           {
+            @Html.ActionLink("Edit", "Edit", new { id = item.Id }, new { @class = "btn btn-warning btn-sm" })
+           }
+           @if (User.Identity.Name == item.AuthorName || User.IsInRole("Admin"))
+           {
+            @Html.ActionLink("Delete", "Delete", new { id = item.Id }, new { @class = "btn btn-danger btn-sm" })
+           }
+       </div>
+   
+    }
+}
+else
+{
+    <h5>Looks like this site has no topics :(</h5>
+}

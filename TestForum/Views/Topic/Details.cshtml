@@ -1,0 +1,42 @@
+﻿@model TestForum.Models.TopicModel
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Posts in topic </h2>
+<p><span>@Model.Title</span></p>
+
+@Html.ActionLink("Create post", actionName: "Create", controllerName: "Post", routeValues: new { id = Model.Id}, htmlAttributes: new { @class="btn btn-primary"})
+<hr/>
+@if (Model.Posts.Any())
+{
+    foreach (var item in Model.Posts)
+    {
+<div class="jumbotron">
+    <h6 class="font-weight-bold">
+        Author: @item.AuthorName
+    </h6>
+    <p>
+        Message: @item.Content
+    </p>
+
+    <footer class="blockquote-footer text-muted">Posted at: @item.CreatedDate</footer>
+    @if (item.AuthorName == User.Identity.Name)
+    {
+        @Html.ActionLink("Edit", actionName: "Edit", controllerName: "Post", routeValues: new { id = item.Id }, htmlAttributes: new { @class = "btn btn-outline-warning" })
+    }
+    @if (item.AuthorName == User.Identity.Name || User.IsInRole("Admin"))
+    {
+        @Html.ActionLink("Delete", actionName: "Delete", controllerName: "Post", routeValues: new { id = item.Id }, htmlAttributes: new { @class = "btn btn-outline-danger" })
+    }
+</div>
+    }
+}
+else
+{
+    <h2>Looks like here is no posts :(</h2>
+}
+
+
+

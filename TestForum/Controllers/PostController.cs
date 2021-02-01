@@ -71,11 +71,18 @@ namespace TestForum.Controllers
         [Authorize]
         public async Task<ActionResult> Edit(PostModel postModel)
         {
-            if (ModelState.IsValid)
+            if (User.Identity.Name == postModel.AuthorName)
             {
-                context.Entry(postModel).State = EntityState.Modified;
-                await context.SaveChangesAsync();
-                return RedirectToAction("Details", "Topic", new { id=postModel.TopicId });
+                if (ModelState.IsValid)
+                {
+                    context.Entry(postModel).State = EntityState.Modified;
+                    await context.SaveChangesAsync();
+                    return RedirectToAction("Details", "Topic", new { id = postModel.TopicId });
+                }
+            }
+            else
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             return View(postModel);
         }
@@ -100,9 +107,16 @@ namespace TestForum.Controllers
         public async Task<ActionResult> DeleteConfirmed(int id)
         {
             PostModel model = await context.Posts.FindAsync(id);
-            context.Posts.Remove(model);
-            await context.SaveChangesAsync();
-            return RedirectToAction("Details", "Topic", new { id = model.TopicId});
+            if (User.Identity.Name == model.AuthorName || User.IsInRole("Admin"))
+            {
+                context.Posts.Remove(model);
+                await context.SaveChangesAsync();
+                return RedirectToAction("Details", "Topic", new { id = model.TopicId });
+            }
+            else
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
         }
     }
 }

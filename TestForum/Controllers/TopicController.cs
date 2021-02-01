@@ -90,11 +90,18 @@ namespace TestForum.Controllers
         [Authorize]
         public async Task<ActionResult> Edit(TopicModel topicModel)
         {
-            if (ModelState.IsValid)
+            if (User.Identity.Name == topicModel.AuthorName)
             {
-                db.Entry(topicModel).State = EntityState.Modified;
-                await db.SaveChangesAsync();
-                return RedirectToAction("Index");
+                if (ModelState.IsValid)
+                {
+                    db.Entry(topicModel).State = EntityState.Modified;
+                    await db.SaveChangesAsync();
+                    return RedirectToAction("Index");
+                }
+            }
+            else
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             return View(topicModel);
         }
@@ -122,9 +129,16 @@ namespace TestForum.Controllers
         public async Task<ActionResult> DeleteConfirmed(int id)
         {
             TopicModel topicModel = await db.Topics.FindAsync(id);
-            db.Topics.Remove(topicModel);
-            await db.SaveChangesAsync();
-            return RedirectToAction("Index");
+            if (User.Identity.Name == topicModel.AuthorName || User.IsInRole("Admin"))
+            {
+                db.Topics.Remove(topicModel);
+                await db.SaveChangesAsync();
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
         }
 
         protected override void Dispose(bool disposing)
